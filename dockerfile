@@ -6,17 +6,21 @@ WORKDIR /app
 
 # Copia package.json y package-lock.json e instala dependencias
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --production
 
 # Copia el resto del código fuente
 COPY . .
 
-# Exponer el puerto 5173 (Vite usa este puerto por defecto)
-EXPOSE 5173
+# Construir la aplicación Vite
+RUN npm run build
+
+# Exponer el puerto 4173 (Vite Preview usa este puerto por defecto)
+EXPOSE 4173
 
 # Configurar Vite para que escuche en todas las interfaces de red
 ENV VITE_HOST=0.0.0.0
 ENV HOST=0.0.0.0
+ENV PORT=4173
 
-# Mantener el proceso en foreground para evitar SIGTERM
-CMD ["sh", "-c", "exec npm run dev -- --host 0.0.0.0 --port 5173 --force"]
+# Iniciar la aplicación en modo producción con preview en el puerto 4173
+CMD ["sh", "-c", "exec npm run preview -- --host 0.0.0.0 --port 4173"]
