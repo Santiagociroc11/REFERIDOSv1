@@ -5,4 +5,4 @@ nixPkgs = ["nodejs_18"]
 cmds = ["npm install", "npm run build"]
 
 [start]
-cmd = "npm run preview"  # Usa "npm start" si es backend
+cmd = "npm run dev" 
