@@ -1,20 +1,31 @@
 import { supabase } from '../lib/supabase';
 import { Client, Pet, Reward, Visit } from '../types';
 
+
 export async function fetchClients(): Promise<Client[]> {
   const { data: clients, error } = await supabase
     .from('clients')
     .select(`
-      *,
+      id,
+      name,
+      phone,
+      email,
+      referrer_id, 
       pets (*),
       rewards (*),
       visits (*, pets (*))
     `)
     .order('name');
 
-  if (error) throw error;
-  return clients;
+  if (error) {
+    console.error("❌ Error en fetchClients:", error);
+  }
+
+  console.log("📢 Datos obtenidos de Supabase:", clients);
+  return clients || [];
 }
+
+
 
 export async function createClient(
   client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'> & { pets: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>[] }

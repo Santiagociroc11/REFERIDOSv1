@@ -28,8 +28,9 @@ function App() {
       const data = await fetchClients();
       setClients(data);
       setLoading(false);
+      console.log("Clientes obtenidos desde Supabase:", data);
     } catch (error) {
-      console.error('Error loading clients:', error);
+      console.error("Error cargando clientes:", error);
       setLoading(false);
     }
   };
@@ -51,13 +52,13 @@ function App() {
       };
 
       await createClient(client);
-      
+
       if (client.referrerId) {
         await checkAndCreateRewards(client.referrerId);
       }
-      
+
       await loadClients();
-      
+
       setNewClient({
         name: '',
         phone: '',
@@ -82,18 +83,39 @@ function App() {
     }
   };
 
+  // ✅ Corregida la función de referidos directos
   const getDirectReferralsCount = (clientId: string): number => {
-    return clients.filter(client => client.referrerId === clientId).length;
+    if (!clients || clients.length === 0) return 0;
+    const count = clients.filter(client => client.referrer_id === clientId).length;
+    console.log(`Referidos directos de ${clientId}:`, count);
+    return count;
   };
 
+  // ✅ Corregida la función de referidos indirectos
   const getIndirectReferralsCount = (clientId: string): number => {
-    const directReferrals = clients.filter(client => client.referrerId === clientId);
-    return directReferrals.reduce((count, directRef) => 
-      count + clients.filter(client => client.referrerId === directRef.id).length, 
-    0);
+    if (!clients || clients.length === 0) return 0;
+    const directReferrals = clients.filter(client => client.referrer_id === clientId);
+    const count = directReferrals.reduce(
+      (total, directClient) => total + clients.filter(client => client.referrer_id === directClient.id).length,
+      0
+    );
+    console.log(`Referidos indirectos de ${clientId}:`, count);
+    return count;
   };
 
-  const filteredClients = clients.filter(client => 
+  const getDirectReferrals = (clientId: string): Client[] => {
+    return clients.filter(client => client.referrer_id === clientId);
+  };
+
+  const getIndirectReferrals = (clientId: string): Client[] => {
+    const directReferrals = getDirectReferrals(clientId);
+    return clients.filter(client =>
+      directReferrals.some(directClient => directClient.id === client.referrer_id)
+    );
+  };
+
+
+  const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.phone.includes(searchTerm)
   );
@@ -180,6 +202,37 @@ function App() {
                       <p className="mb-1"><span className="font-medium">Teléfono:</span> {selectedClient.phone}</p>
                       {selectedClient.email && <p className="mb-1"><span className="font-medium">Email:</span> {selectedClient.email}</p>}
                     </div>
+                  </div>
+
+                  {/* 🔥 Nueva sección: Lista de referidos directos e indirectos */}
+                  <div className="mt-4">
+                    <h3 className="text-md font-semibold">Referidos Directos ({getDirectReferralsCount(selectedClient.id)})</h3>
+                    {getDirectReferrals(selectedClient.id).length > 0 ? (
+                      <ul className="list-disc ml-6">
+                        {getDirectReferrals(selectedClient.id).map(ref => (
+                          <li key={ref.id} className="text-sm text-gray-700">
+                            {ref.name} - {ref.phone}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-500">No tiene referidos directos.</p>
+                    )}
+                  </div>
+
+                  <div className="mt-4">
+                    <h3 className="text-md font-semibold">Referidos Indirectos ({getIndirectReferralsCount(selectedClient.id)})</h3>
+                    {getIndirectReferrals(selectedClient.id).length > 0 ? (
+                      <ul className="list-disc ml-6">
+                        {getIndirectReferrals(selectedClient.id).map(ref => (
+                          <li key={ref.id} className="text-sm text-gray-700">
+                            {ref.name} - {ref.phone}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-500">No tiene referidos indirectos.</p>
+                    )}
                   </div>
 
                   <div>
@@ -270,7 +323,7 @@ function App() {
                   onChange={(e) => setNewClient(prev => ({ ...prev, name: e.target.value }))}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Teléfono</label>
                 <input
@@ -319,7 +372,7 @@ function App() {
                       onChange={(e) => setNewClient(prev => ({ ...prev, petName: e.target.value }))}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Especie</label>
                     <input
