@@ -76,12 +76,26 @@ function App() {
 
   const handleClaimReward = async (rewardId: string) => {
     try {
-      await updateRewardStatus(rewardId);
+      console.log(`🛠️ Intentando reclamar recompensa con ID: ${rewardId}`);
+  
+      const result = await updateRewardStatus(rewardId);
+  
+      if (!result) {
+        alert("❌ No se pudo reclamar la recompensa. Inténtalo de nuevo.");
+        return;
+      }
+  
+      console.log("✅ Recompensa reclamada correctamente.");
+  
       await loadClients();
+  
+      alert("🎉 ¡Recompensa reclamada con éxito!");
     } catch (error) {
-      console.error('Error claiming reward:', error);
+      console.error('❌ Error al reclamar la recompensa:', error);
+      alert("❌ Error al reclamar la recompensa.");
     }
   };
+  
 
   // ✅ Corregida la función de referidos directos
   const getDirectReferralsCount = (clientId: string): number => {
@@ -127,7 +141,7 @@ function App() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Users className="h-8 w-8 text-blue-600" />
-              <h1 className="ml-2 text-xl font-bold text-gray-800">Sistema de Referidos - Veterinaria</h1>
+              <h1 className="ml-2 text-xl font-bold text-gray-800">Sistema de Referidos - AGRO VETERINARIA EL TEMPLO</h1>
             </div>
             <button
               onClick={() => setShowAddForm(true)}

@@ -64,17 +64,20 @@ export async function createClient(
   } as Client;
 }
 
-export async function updateRewardStatus(rewardId: string, status: 'CLAIMED'): Promise<void> {
+export async function updateRewardStatus(rewardId: string) {
   const { error } = await supabase
     .from('rewards')
-    .update({
-      status,
-      date_claimed: new Date().toISOString()
-    })
+    .update({ status: 'CLAIMED' }) // 🔥 Asegurar que se actualiza correctamente
     .eq('id', rewardId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("❌ Error al actualizar recompensa:", error);
+    return null;
+  }
+
+  return { success: true };
 }
+
 
 export async function createVisit(visit: Omit<Visit, 'id' | 'createdAt' | 'updatedAt'>): Promise<Visit> {
   const { data, error } = await supabase
