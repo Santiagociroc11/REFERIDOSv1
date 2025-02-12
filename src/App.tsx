@@ -170,8 +170,9 @@ function App() {
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
-            <Users className="h-8 w-8 text-blue-600" />
-            <h1 className="ml-2 text-xl font-bold text-gray-800">Sistema de Referidos</h1>
+          <Users className="h-8 w-8 text-blue-600" />
+          <h1 className="ml-2 text-xl font-bold text-gray-800">Sistema de Referidos - AGRO VETERINARIA EL TEMPLO</h1>
+            <h1 className="ml-2 text-xl font-bold text-gray-800"></h1>
           </div>
           <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded-lg">
             Cerrar Sesión
@@ -184,8 +185,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-blue-600" />
-              <h1 className="ml-2 text-xl font-bold text-gray-800">Sistema de Referidos - AGRO VETERINARIA EL TEMPLO</h1>
+              
             </div>
             <button
               onClick={() => setShowAddForm(true)}
