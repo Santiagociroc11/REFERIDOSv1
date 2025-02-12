@@ -11,8 +11,12 @@ RUN npm install
 # Copia el resto del código fuente
 COPY . .
 
-# Expone el puerto en el que corre la aplicación
-EXPOSE 3000
+# Exponer el puerto 5173 (Vite usa este puerto por defecto)
+EXPOSE 5173
 
-# Comando para iniciar la aplicación en desarrollo
-CMD ["npm", "run", "dev"]
+# Configurar Vite para que escuche en todas las interfaces de red
+ENV VITE_HOST=0.0.0.0
+ENV HOST=0.0.0.0
+
+# Comando para iniciar la aplicación con Vite
+CMD ["npm", "run", "dev", "--", "--host"]
