@@ -11,7 +11,7 @@ RUN npm install
 # Copia el resto del código fuente
 COPY . .
 
-# Exponer el puerto 5173
+# Exponer el puerto 5173 (Vite usa este puerto por defecto)
 EXPOSE 5173
 
 # Configurar Vite para que escuche en todas las interfaces de red
@@ -19,4 +19,4 @@ ENV VITE_HOST=0.0.0.0
 ENV HOST=0.0.0.0
 
 # Mantener el proceso en foreground para evitar SIGTERM
-CMD ["sh", "-c", "npm run dev -- --host 0.0.0.0 --port 5173 --force"]
+CMD ["sh", "-c", "exec npm run dev -- --host 0.0.0.0 --port 5173 --force"]
