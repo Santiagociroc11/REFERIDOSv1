@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Login from './login';
 import { Users, UserPlus, Gift, Search, ChevronRight, UserCheck, UsersRound } from 'lucide-react';
 import { Client, Reward, Pet } from './types';
 import { fetchClients, createClient, updateRewardStatus, checkAndCreateRewards } from './utils/supabaseUtils';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +25,14 @@ function App() {
     loadClients();
   }, []);
 
+  useEffect(() => {
+    // Revisar si el usuario ya está autenticado
+    const authStatus = localStorage.getItem('isAuthenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   const loadClients = async () => {
     try {
       const data = await fetchClients();
@@ -34,6 +44,17 @@ function App() {
       setLoading(false);
     }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLogin={() => setIsAuthenticated(true)} />;
+  }
+
+
 
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,26 +97,34 @@ function App() {
 
   const handleClaimReward = async (rewardId: string) => {
     try {
-      console.log(`🛠️ Intentando reclamar recompensa con ID: ${rewardId}`);
-  
-      const result = await updateRewardStatus(rewardId);
-  
+      const claimedDescription = prompt("📝 ingresa una descripción para reclamar la recompensa (diga que reclama y quien lo reclama):");
+
+      if (!claimedDescription || claimedDescription.trim() === "") {
+        alert("❌ Debes ingresar una descripción para reclamar la recompensa (diga que reclamó y quien lo reclamó)");
+        return;
+      }
+
+      console.log(`🛠️ Intentando reclamar recompensa con ID: ${rewardId} y descripción: ${claimedDescription}`);
+
+      const result = await updateRewardStatus(rewardId, claimedDescription);
+
       if (!result) {
         alert("❌ No se pudo reclamar la recompensa. Inténtalo de nuevo.");
         return;
       }
-  
+
       console.log("✅ Recompensa reclamada correctamente.");
-  
+
       await loadClients();
-  
+
       alert("🎉 ¡Recompensa reclamada con éxito!");
     } catch (error) {
       console.error('❌ Error al reclamar la recompensa:', error);
       alert("❌ Error al reclamar la recompensa.");
     }
   };
-  
+
+
 
   // ✅ Corregida la función de referidos directos
   const getDirectReferralsCount = (clientId: string): number => {
@@ -135,6 +164,21 @@ function App() {
   );
 
   return (
+
+
+    <div className="min-h-screen bg-gray-100">
+      <nav className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-blue-600" />
+            <h1 className="ml-2 text-xl font-bold text-gray-800">Sistema de Referidos</h1>
+          </div>
+          <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded-lg">
+            Cerrar Sesión
+          </button>
+        </div>
+      </nav>
+
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -215,6 +259,7 @@ function App() {
                       <p className="mb-1"><span className="font-medium">Nombre:</span> {selectedClient.name}</p>
                       <p className="mb-1"><span className="font-medium">Teléfono:</span> {selectedClient.phone}</p>
                       {selectedClient.email && <p className="mb-1"><span className="font-medium">Email:</span> {selectedClient.email}</p>}
+                      <p className="mb-1"><span className="font-medium">Fecha de Inscripción:</span> {new Date(selectedClient.registration_date).toLocaleDateString()}</p>
                     </div>
                   </div>
 
@@ -225,7 +270,7 @@ function App() {
                       <ul className="list-disc ml-6">
                         {getDirectReferrals(selectedClient.id).map(ref => (
                           <li key={ref.id} className="text-sm text-gray-700">
-                            {ref.name} - {ref.phone}
+                            {ref.name} - {ref.phone} (Registrado: {new Date(ref.registration_date).toLocaleDateString()})
                           </li>
                         ))}
                       </ul>
@@ -240,7 +285,7 @@ function App() {
                       <ul className="list-disc ml-6">
                         {getIndirectReferrals(selectedClient.id).map(ref => (
                           <li key={ref.id} className="text-sm text-gray-700">
-                            {ref.name} - {ref.phone}
+                            {ref.name} - {ref.phone} (Registrado: {new Date(ref.registration_date).toLocaleDateString()})
                           </li>
                         ))}
                       </ul>
@@ -292,8 +337,16 @@ function App() {
                             <div>
                               <p className="font-medium">{reward.description}</p>
                               <p className="text-sm text-gray-600">
-                                Estado: {reward.status === 'PENDING' ? 'Pendiente' : 'Reclamada'}
+                                Fecha de ganada: {new Date(reward.date_earned).toLocaleDateString()}
                               </p>
+                              <p className="text-sm text-gray-600">
+                                Estado: {reward.status === 'PENDING' ? 'Pendiente' : `Reclamada el: ${new Date(reward.date_claimed).toLocaleDateString()}`}
+                              </p>
+                              {reward.claimed_description && (
+                                <p className="text-sm text-gray-600">
+                                  📌 Observación: {reward.claimed_description}
+                                </p>
+                              )}
                             </div>
                             {reward.status === 'PENDING' && (
                               <button
@@ -429,6 +482,21 @@ function App() {
           </div>
         </div>
       )}
+    </div>
+    <main className="max-w-7xl mx-auto px-4 py-6">
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar cliente por nombre o teléfono..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

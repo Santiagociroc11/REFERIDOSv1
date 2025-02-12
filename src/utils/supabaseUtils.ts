@@ -11,8 +11,9 @@ export async function fetchClients(): Promise<Client[]> {
       phone,
       email,
       referrer_id, 
+      registration_date,
       pets (*),
-      rewards (*),
+      rewards (id, description, status, date_earned, date_claimed, claimed_description),
       visits (*, pets (*))
     `)
     .order('name');
@@ -64,18 +65,28 @@ export async function createClient(
   } as Client;
 }
 
-export async function updateRewardStatus(rewardId: string) {
-  const { error } = await supabase
+export async function updateRewardStatus(rewardId: string, claimedDescription: string): Promise<boolean> {
+  try{
+    const { data, error } = await supabase
     .from('rewards')
-    .update({ status: 'CLAIMED' }) // 🔥 Asegurar que se actualiza correctamente
+    .update({
+      status: 'CLAIMED',  // Cambia el estado a reclamado
+      date_claimed: new Date().toISOString(), // Guarda la fecha y hora actual
+      claimed_description: claimedDescription // Guardar la descripción
+    })
     .eq('id', rewardId);
 
-  if (error) {
-    console.error("❌ Error al actualizar recompensa:", error);
-    return null;
-  }
+    if (error) {
+      console.error("❌ Error al actualizar la recompensa:", error);
+      return false;
+    }
 
-  return { success: true };
+    console.log("✅ Recompensa reclamada correctamente:", data);
+    return true;
+  } catch (error) {
+    console.error("❌ Error en updateRewardStatus:", error);
+    return false;
+  }
 }
 
 
