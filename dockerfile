@@ -4,23 +4,27 @@ FROM node:18
 # Define el directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Copia package.json y package-lock.json e instala TODAS las dependencias (incluyendo devDependencies)
+# Copia package.json y package-lock.json e instala TODAS las dependencias
 COPY package.json package-lock.json ./
 RUN npm install
 
 # Copia el resto del código fuente
 COPY . .
 
-# Construir la aplicación Vite
-RUN npm run build
+# Definir las variables de entorno en el build
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 
-# Exponer el puerto 4173 (Vite Preview usa este puerto por defecto)
+# Construir la aplicación Vite con las variables de entorno
+RUN VITE_SUPABASE_URL=$VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY npm run build
+
+# Instalar `serve` para producción
+RUN npm install -g serve
+
+# Exponer el puerto 4173
 EXPOSE 4173
 
-# Configurar Vite para que escuche en todas las interfaces de red
-ENV VITE_HOST=0.0.0.0
-ENV HOST=0.0.0.0
-ENV PORT=4173
-
-# Iniciar la aplicación en modo producción con preview en el puerto 4173
-CMD ["sh", "-c", "exec npm run preview -- --host 0.0.0.0 --port 4173"]
+# Servir la aplicación con `serve`
+CMD ["sh", "-c", "exec serve -s dist -l 4173"]
