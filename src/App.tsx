@@ -483,6 +483,9 @@ function App() {
         </div>
       )}
     </div>
+    <footer className="bg-gray-200 text-center text-gray-600 py-4 mt-6">
+        <p>Desarrollado por <strong>Santiago Ciro - AutomSCC</strong></p>
+      </footer>
     </div>
   );
 }
