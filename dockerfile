@@ -18,5 +18,5 @@ EXPOSE 5173
 ENV VITE_HOST=0.0.0.0
 ENV HOST=0.0.0.0
 
-# Comando para iniciar la aplicación con Vite
-CMD ["npm", "run", "dev", "--", "--host"]
+# Comando para iniciar la aplicación y mantener el proceso activo
+CMD ["sh", "-c", "exec npm run dev"]
