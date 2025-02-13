@@ -15,6 +15,7 @@ function App() {
   const [customBreed, setCustomBreed] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showReferrerList, setShowReferrerList] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchReferrerTerm, setSearchReferrerTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -197,18 +198,18 @@ function App() {
   };
 
 
- const filteredClients = clients.filter(client =>
-  client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  client.phone.includes(searchTerm) ||
-  client.cedula.includes(searchTerm)
-);
+  const filteredClients = clients.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.phone.includes(searchTerm) ||
+    client.cedula.includes(searchTerm)
+  );
 
 
   // Filtrar clientes por nombre o teléfono
   const filteredReferrers = clients.filter(client =>
     client.name.toLowerCase().includes(searchReferrerTerm.toLowerCase()) ||
     client.phone.includes(searchReferrerTerm) ||
-    client.cedula.includes(searchTerm)
+    client.cedula.includes(searchReferrerTerm)
   );
 
   // 🔢 Total de clientes
@@ -340,7 +341,7 @@ function App() {
                       <div className="text-center py-4">Cargando...</div>
                     ) : (
                       <div className="space-y-4">
-                        {filteredClients.map(client => (
+                        {filteredClients.slice(0, searchTerm ? filteredClients.length : 5).map(client => (
                           <div
                             key={client.id}
                             className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50"
@@ -366,6 +367,14 @@ function App() {
                             </div>
                           </div>
                         ))}
+
+                        {/* 🔥 Mensaje de aviso si hay más clientes ocultos */}
+                        {!searchTerm && filteredClients.length > 7 && (
+                          <p className="text-sm text-gray-500 text-center">
+                            ⚡ Usa el buscador para ver más clientes...
+                          </p>
+                        )}
+
                       </div>
                     )}
                   </div>
@@ -557,32 +566,55 @@ function App() {
                         />
                       </div>
 
-                      <div>
+                      <div className="relative">
+
                         <label className="block text-sm font-medium text-gray-700">Referido por (opcional)</label>
 
-                        {/* Input para buscar el referido */}
+                        {/* Input para buscar y mostrar el referido */}
                         <input
                           type="text"
-                          placeholder="Buscar por nombre o teléfono o cedula..."
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          placeholder="Buscar por nombre, cédula o teléfono..."
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
                           value={searchReferrerTerm}
-                          onChange={(e) => setSearchReferrerTerm(e.target.value)}
+                          onChange={(e) => {
+                            setSearchReferrerTerm(e.target.value);
+                            setNewClient(prev => ({ ...prev, referrerId: "" })); // Permitir cambios
+                            setShowReferrerList(true);
+                          }}
+                          onFocus={() => setShowReferrerList(true)}
+                          onBlur={() => setTimeout(() => setShowReferrerList(false), 200)}
                         />
 
-                        {/* Lista de resultados filtrados */}
-                        {searchReferrerTerm && (
-                          <ul className="mt-2 max-h-40 overflow-auto border border-gray-300 rounded-md bg-white shadow-md">
+                        {/* Botón para limpiar selección */}
+                        {newClient.referrerId && (
+                          <button
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-600"
+                            onClick={() => {
+                              setNewClient(prev => ({ ...prev, referrerId: "" }));
+                              setSearchReferrerTerm("");
+                            }}
+                          >
+                            ❌
+                          </button>
+                        )}
+
+                        {/* Lista de referidos con selección */}
+                        {showReferrerList && searchReferrerTerm && (
+                          <ul className="absolute mt-1 max-h-40 overflow-auto border border-gray-300 rounded-md bg-white shadow-md w-full z-10">
                             {filteredReferrers.length > 0 ? (
                               filteredReferrers.map(ref => (
                                 <li
                                   key={ref.id}
-                                  className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+                                  className={`px-4 py-2 cursor-pointer flex justify-between items-center ${newClient.referrerId === ref.id ? "bg-green-200 font-bold" : "hover:bg-blue-100"
+                                    }`}
                                   onClick={() => {
                                     setNewClient(prev => ({ ...prev, referrerId: ref.id }));
-                                    setSearchReferrerTerm(ref.name); // Mostrar el nombre seleccionado
+                                    setSearchReferrerTerm(`${ref.name} - ${ref.cedula || "Sin cédula"} - ${ref.phone}`);
+                                    setShowReferrerList(false);
                                   }}
                                 >
-                                  {ref.name} - {ref.phone}
+                                  <span>{ref.name} - {ref.cedula || "Sin cédula"} - {ref.phone}</span>
+                                  {newClient.referrerId === ref.id && <span className="text-green-700 font-bold">✔️</span>}
                                 </li>
                               ))
                             ) : (
@@ -591,6 +623,7 @@ function App() {
                           </ul>
                         )}
                       </div>
+
 
                       <div>
                         <h3 className="text-sm font-medium text-gray-700 mb-2">Información de la Mascota</h3>
