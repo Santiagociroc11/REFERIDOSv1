@@ -27,18 +27,38 @@ export async function fetchClients(): Promise<Client[]> {
 }
 
 export async function deleteClient(clientId: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('clients')
-    .delete()
-    .eq('id', clientId);
+  try {
+    // 🔍 Buscar referidos directos de este cliente
+    const { data: referrals, error: refError } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('referrer_id', clientId);
 
-  if (error) {
+    if (refError) throw refError;
+
+    // 🚨 Si tiene referidos, detener la eliminación
+    if (referrals.length > 0) {
+      alert("❌ No puedes eliminar este cliente porque tiene referidos. Elimina o reasigna sus referidos primero.");
+      return false;
+    }
+
+
+    const { error } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', clientId);
+
+    if (error) {
+      console.error("❌ Error al eliminar cliente:", error);
+      return false;
+    }
+
+    console.log("✅ Cliente eliminado correctamente:", clientId);
+    return true;
+  } catch (error) {
     console.error("❌ Error al eliminar cliente:", error);
     return false;
   }
-
-  console.log("✅ Cliente eliminado correctamente:", clientId);
-  return true;
 }
 
 
