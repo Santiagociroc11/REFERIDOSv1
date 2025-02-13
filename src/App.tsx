@@ -8,6 +8,9 @@ import { fetchClients, createClient, updateRewardStatus, checkAndCreateRewards, 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
+  const [selectedSpecies, setSelectedSpecies] = useState('');
+  const [selectedBreed, setSelectedBreed] = useState('');
+  const [customBreed, setCustomBreed] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -45,6 +48,15 @@ function App() {
       console.error("Error cargando clientes:", error);
       setLoading(false);
     }
+  };
+
+  const speciesData = {
+    "Perro": ["Labrador", "Poodle", "Bulldog", "Golden Retriever", "Chihuahua", "Pastor Alemán", "Dálmata", "Shih Tzu", "YorkShire", "Pug", "Pitbull", "Mestizo",   "Otro"],
+    "Gato": ["Persa", "Siamés", "Maine Coon", "Bengalí", "Ragdoll", "Sphynx", "Mestizo","Otro"],
+    "Ave": ["Canario", "Periquito", "Cotorra", "Guacamayo", "Otro"],
+    "Pez": ["Betta", "Goldfish", "Guppy", "Tetra Neón", "Otro"],
+    "Reptil": ["Iguana", "Gecko", "Tortuga", "Serpiente", "Otro"],
+    "Otro": []
   };
 
   const handleLogout = () => {
@@ -184,7 +196,7 @@ function App() {
     client.phone.includes(searchTerm)
   );
   // Estado para la búsqueda de referido
-  
+
 
   // Filtrar clientes por nombre o teléfono
   const filteredReferrers = clients.filter(client =>
@@ -491,6 +503,8 @@ function App() {
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 mb-2">Información de la Mascota</h3>
                   <div className="space-y-3">
+
+                    {/* Nombre de la mascota */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Nombre</label>
                       <input
@@ -502,29 +516,80 @@ function App() {
                       />
                     </div>
 
+                    {/* Selección de Especie */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Especie</label>
-                      <input
-                        type="text"
+                      <select
                         required
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         value={newClient.petSpecies}
-                        onChange={(e) => setNewClient(prev => ({ ...prev, petSpecies: e.target.value }))}
-                      />
+                        onChange={(e) => {
+                          const species = e.target.value;
+                          setSelectedSpecies(species);
+                          setSelectedBreed('');
+                          setCustomBreed(false);
+                          setNewClient(prev => ({ ...prev, petSpecies: species, petBreed: '' }));
+                        }}
+                      >
+                        <option value="">Selecciona una especie</option>
+                        {Object.keys(speciesData).map(species => (
+                          <option key={species} value={species}>{species}</option>
+                        ))}
+                      </select>
                     </div>
 
+                    {/* Selección de Raza (Dependiente de la Especie) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Raza (opcional)</label>
-                      <input
-                        type="text"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        value={newClient.petBreed}
-                        onChange={(e) => setNewClient(prev => ({ ...prev, petBreed: e.target.value }))}
-                      />
+                      {selectedSpecies && speciesData[selectedSpecies].length > 0 ? (
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={selectedBreed}
+                          onChange={(e) => {
+                            const breed = e.target.value;
+                            if (breed === "Otro") {
+                              setCustomBreed(true);
+                              setNewClient(prev => ({ ...prev, petBreed: '' }));
+                            } else {
+                              setCustomBreed(false);
+                              setNewClient(prev => ({ ...prev, petBreed: breed }));
+                            }
+                            setSelectedBreed(breed);
+                          }}
+                        >
+                          <option value="">Selecciona una raza</option>
+                          {speciesData[selectedSpecies].map(breed => (
+                            <option key={breed} value={breed}>{breed}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder="Ingresa la raza"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={newClient.petBreed}
+                          onChange={(e) => setNewClient(prev => ({ ...prev, petBreed: e.target.value }))}
+                        />
+                      )}
                     </div>
+
+                    {/* Input para raza personalizada si elige "Otro" */}
+                    {customBreed && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Especificar Raza</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Escribe la raza aquí..."
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={newClient.petBreed}
+                          onChange={(e) => setNewClient(prev => ({ ...prev, petBreed: e.target.value }))}
+                        />
+                      </div>
+                    )}
+
                   </div>
                 </div>
-
                 <div className="flex justify-end space-x-3">
                   <button
                     type="button"
