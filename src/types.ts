@@ -2,6 +2,7 @@ export interface Client {
   id: string;
   name: string;
   phone: string;
+  cedula: string
   email?: string;
   registrationDate: string;
   referrerId?: string;

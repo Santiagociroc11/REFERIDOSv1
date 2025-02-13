@@ -22,11 +22,13 @@ function App() {
     name: '',
     phone: '',
     email: '',
+    cedula: '',
     referrerId: '',
     petName: '',
     petSpecies: '',
     petBreed: ''
   });
+
 
   useEffect(() => {
     loadClients();
@@ -101,6 +103,7 @@ function App() {
         name: newClient.name,
         phone: newClient.phone,
         email: newClient.email || undefined,
+        cedula: newClient.cedula,
         registrationDate: new Date().toISOString(),
         referrerId: newClient.referrerId || undefined,
         pets: [{
@@ -122,11 +125,13 @@ function App() {
         name: '',
         phone: '',
         email: '',
+        cedula: '',
         referrerId: '',
         petName: '',
         petSpecies: '',
         petBreed: ''
       });
+
       setShowAddForm(false);
     } catch (error) {
       console.error('❌ Error al registrar cliente:', error);
@@ -192,17 +197,18 @@ function App() {
   };
 
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.phone.includes(searchTerm)
-  );
-  // Estado para la búsqueda de referido
+ const filteredClients = clients.filter(client =>
+  client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  client.phone.includes(searchTerm) ||
+  client.cedula.includes(searchTerm)
+);
 
 
   // Filtrar clientes por nombre o teléfono
   const filteredReferrers = clients.filter(client =>
     client.name.toLowerCase().includes(searchReferrerTerm.toLowerCase()) ||
-    client.phone.includes(searchReferrerTerm)
+    client.phone.includes(searchReferrerTerm) ||
+    client.cedula.includes(searchTerm)
   );
 
   // 🔢 Total de clientes
@@ -319,7 +325,7 @@ function App() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
-                      placeholder="Buscar cliente por nombre o teléfono..."
+                      placeholder="Buscar cliente por nombre o teléfono o cedula..."
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -344,6 +350,7 @@ function App() {
                               <div>
                                 <h3 className="font-medium">{client.name}</h3>
                                 <p className="text-sm text-gray-600">{client.phone}</p>
+                                <p className="text-sm text-gray-600">🆔 Cédula: {client.cedula}</p>
                                 <div className="flex items-center gap-4 mt-2">
                                   <div className="flex items-center text-sm text-blue-600">
                                     <UserCheck className="h-4 w-4 mr-1" />
@@ -372,6 +379,7 @@ function App() {
                             <h3 className="font-medium text-gray-700 mb-2">Información Personal</h3>
                             <div className="bg-gray-50 p-4 rounded-lg">
                               <p className="mb-1"><span className="font-medium">Nombre:</span> {selectedClient.name}</p>
+                              <p className="mb-1"><span className="font-medium">Cédula:</span> {selectedClient.cedula}</p>
                               <p className="mb-1"><span className="font-medium">Teléfono:</span> {selectedClient.phone}</p>
                               {selectedClient.email && <p className="mb-1"><span className="font-medium">Email:</span> {selectedClient.email}</p>}
                               <p className="mb-1"><span className="font-medium">Fecha de Inscripción:</span> {new Date(selectedClient.registration_date).toLocaleDateString()}</p>
@@ -518,6 +526,17 @@ function App() {
                       </div>
 
                       <div>
+                        <label className="block text-sm font-medium text-gray-700">Cédula</label>
+                        <input
+                          type="text"
+                          required
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={newClient.cedula}
+                          onChange={(e) => setNewClient(prev => ({ ...prev, cedula: e.target.value }))}
+                        />
+                      </div>
+
+                      <div>
                         <label className="block text-sm font-medium text-gray-700">Teléfono</label>
                         <input
                           type="tel"
@@ -544,7 +563,7 @@ function App() {
                         {/* Input para buscar el referido */}
                         <input
                           type="text"
-                          placeholder="Buscar por nombre o teléfono..."
+                          placeholder="Buscar por nombre o teléfono o cedula..."
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                           value={searchReferrerTerm}
                           onChange={(e) => setSearchReferrerTerm(e.target.value)}

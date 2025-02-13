@@ -9,6 +9,7 @@ export async function fetchClients(): Promise<Client[]> {
       id,
       name,
       phone,
+      cedula,
       email,
       referrer_id, 
       registration_date,
@@ -70,6 +71,7 @@ export async function createClient(
     .insert({
       name: client.name,
       phone: client.phone,
+      cedula: client.cedula,
       email: client.email,
       registration_date: client.registrationDate,
       referrer_id: client.referrerId
