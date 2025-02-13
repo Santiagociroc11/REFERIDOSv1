@@ -91,8 +91,6 @@ function App() {
     }
   };
 
-
-
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return; // Evita doble envío
@@ -164,7 +162,6 @@ function App() {
     }
   };
 
-  // ✅ Corregida la función de referidos directos
   const getDirectReferralsCount = (clientId: string): number => {
     if (!clients || clients.length === 0) return 0;
     const count = clients.filter(client => client.referrer_id === clientId).length;
@@ -172,7 +169,6 @@ function App() {
     return count;
   };
 
-  // ✅ Corregida la función de referidos indirectos
   const getIndirectReferralsCount = (clientId: string): number => {
     if (!clients || clients.length === 0) return 0;
     const directReferrals = clients.filter(client => client.referrer_id === clientId);
@@ -430,7 +426,7 @@ function App() {
                                   <UsersRound className="h-5 w-5 text-green-600" />
                                 </div>
                                 <p className="text-2xl font-bold text-green-700">{getIndirectReferralsCount(selectedClient.id)}</p>
-                                <p className="text-sm text-green-600">Próxima recompensa en: {5 - (getIndirectReferralsCount(selectedClient.id) % 5)} más</p>
+                                <p className="text-sm text-green-600">Próxima recompensa en: {6 - (getIndirectReferralsCount(selectedClient.id) % 6)} más</p>
                               </div>
                             </div>
                           </div>
@@ -787,9 +783,11 @@ function App() {
                   {pendingRewards.map(reward => (
                     <li key={reward.id} className="flex justify-between items-center py-4">
                       <div>
-                        <h3 className="font-medium text-gray-700">{reward.description}</h3>
                         <p className="text-sm text-gray-600">Cliente: {reward.clientName} ({reward.clientPhone})</p>
-                        <p className="text-sm text-gray-600">Fecha Ganada: {new Date(reward.dateEarned).toLocaleDateString()}</p>
+                        <p className="font-medium">{reward.description}</p>
+                        <p className="text-sm text-gray-600">
+                          Fecha de ganada: {new Date(reward.date_earned).toLocaleDateString()}
+                        </p>
                       </div>
                       <button onClick={() => handleClaimReward(reward.id)} className="bg-green-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-600">
                         Reclamar

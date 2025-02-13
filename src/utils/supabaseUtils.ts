@@ -80,15 +80,15 @@ export async function createClient(
 }
 
 export async function updateRewardStatus(rewardId: string, claimedDescription: string): Promise<boolean> {
-  try{
+  try {
     const { data, error } = await supabase
-    .from('rewards')
-    .update({
-      status: 'CLAIMED',  // Cambia el estado a reclamado
-      date_claimed: new Date().toISOString(), // Guarda la fecha y hora actual
-      claimed_description: claimedDescription // Guardar la descripción
-    })
-    .eq('id', rewardId);
+      .from('rewards')
+      .update({
+        status: 'CLAIMED',  // Cambia el estado a reclamado
+        date_claimed: new Date().toISOString(), // Guarda la fecha y hora actual
+        claimed_description: claimedDescription // Guardar la descripción
+      })
+      .eq('id', rewardId);
 
     if (error) {
       console.error("❌ Error al actualizar la recompensa:", error);
@@ -160,7 +160,7 @@ export async function checkAndCreateRewards(clientId: string): Promise<void> {
   const secondLevelRewardsCount = existingRewards?.filter(r => r.type === 'SECOND_LEVEL').length || 0;
 
   const newDirectRewardsCount = Math.floor(directCount / 3) - directRewardsCount;
-  const newSecondLevelRewardsCount = Math.floor(secondLevelCount / 5) - secondLevelRewardsCount;
+  const newSecondLevelRewardsCount = Math.floor(secondLevelCount / 6) - secondLevelRewardsCount;
 
   const newRewards = [];
 
@@ -176,7 +176,7 @@ export async function checkAndCreateRewards(clientId: string): Promise<void> {
     newRewards.push({
       client_id: clientId,
       type: 'SECOND_LEVEL',
-      description: 'Recompensa por 5 referidos en segunda línea'
+      description: 'Recompensa por 6 referidos en segunda línea'
     });
   }
 

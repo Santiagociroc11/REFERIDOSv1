@@ -48,7 +48,7 @@ export const checkRewardEligibility = (
     r => r.clientId === client.id && r.type === 'SECOND_LEVEL'
   ).length;
   
-  const newSecondLevelRewardsEarned = Math.floor(secondLevelReferrals.length / 5) - secondLevelRewardsCount;
+  const newSecondLevelRewardsEarned = Math.floor(secondLevelReferrals.length / 6) - secondLevelRewardsCount;
   
   for (let i = 0; i < newSecondLevelRewardsEarned; i++) {
     newRewards.push({
@@ -57,7 +57,7 @@ export const checkRewardEligibility = (
       type: 'SECOND_LEVEL',
       status: 'PENDING',
       dateEarned: new Date().toISOString(),
-      description: 'Recompensa por 5 referidos en segunda línea'
+      description: 'Recompensa por 6 referidos en segunda línea'
     });
   }
   
