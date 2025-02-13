@@ -11,6 +11,7 @@ function App() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [searchReferrerTerm, setSearchReferrerTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [newClient, setNewClient] = useState({
     name: '',
@@ -58,15 +59,15 @@ function App() {
 
   const handleDeleteClient = async (clientId: string) => {
     console.log(`🛠 Intentando eliminar el cliente con ID: ${clientId}`);
-  
+
     const confirmDelete = window.confirm("❌ ¿Estás seguro de que quieres eliminar este cliente?");
     if (!confirmDelete) {
       console.log("🚫 Eliminación cancelada por el usuario.");
       return;
     }
-  
+
     console.log("✅ Confirmación aceptada. Procediendo a eliminar...");
-  
+
     const success = await deleteClient(clientId);
     if (success) {
       console.log("✅ Cliente eliminado con éxito.");
@@ -78,8 +79,8 @@ function App() {
       alert("❌ Error al eliminar el cliente. Inténtalo de nuevo.");
     }
   };
-  
-  
+
+
 
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,6 +183,15 @@ function App() {
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.phone.includes(searchTerm)
   );
+  // Estado para la búsqueda de referido
+  
+
+  // Filtrar clientes por nombre o teléfono
+  const filteredReferrers = clients.filter(client =>
+    client.name.toLowerCase().includes(searchReferrerTerm.toLowerCase()) ||
+    client.phone.includes(searchReferrerTerm)
+  );
+
 
   return (
 
@@ -445,16 +455,37 @@ function App() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Referido por (opcional)</label>
-                  <select
+
+                  {/* Input para buscar el referido */}
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre o teléfono..."
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    value={newClient.referrerId}
-                    onChange={(e) => setNewClient(prev => ({ ...prev, referrerId: e.target.value }))}
-                  >
-                    <option value="">Ninguno</option>
-                    {clients.map(client => (
-                      <option key={client.id} value={client.id}>{client.name}</option>
-                    ))}
-                  </select>
+                    value={searchReferrerTerm}
+                    onChange={(e) => setSearchReferrerTerm(e.target.value)}
+                  />
+
+                  {/* Lista de resultados filtrados */}
+                  {searchReferrerTerm && (
+                    <ul className="mt-2 max-h-40 overflow-auto border border-gray-300 rounded-md bg-white shadow-md">
+                      {filteredReferrers.length > 0 ? (
+                        filteredReferrers.map(ref => (
+                          <li
+                            key={ref.id}
+                            className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+                            onClick={() => {
+                              setNewClient(prev => ({ ...prev, referrerId: ref.id }));
+                              setSearchReferrerTerm(ref.name); // Mostrar el nombre seleccionado
+                            }}
+                          >
+                            {ref.name} - {ref.phone}
+                          </li>
+                        ))
+                      ) : (
+                        <li className="px-4 py-2 text-gray-500">No se encontraron resultados</li>
+                      )}
+                    </ul>
+                  )}
                 </div>
 
                 <div>
