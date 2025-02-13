@@ -26,6 +26,20 @@ export async function fetchClients(): Promise<Client[]> {
   return clients || [];
 }
 
+export async function deleteClient(clientId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('clients')
+    .delete()
+    .eq('id', clientId);
+
+  if (error) {
+    console.error("❌ Error al eliminar cliente:", error);
+    return false;
+  }
+
+  console.log("✅ Cliente eliminado correctamente:", clientId);
+  return true;
+}
 
 
 export async function createClient(
