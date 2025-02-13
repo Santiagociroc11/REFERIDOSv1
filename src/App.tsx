@@ -53,9 +53,6 @@ function App() {
   const speciesData = {
     "Perro": ["Labrador", "Poodle", "Bulldog", "Golden Retriever", "Chihuahua", "Pastor Alemán", "Dálmata", "Shih Tzu", "YorkShire", "Pug", "Pitbull", "Mestizo",   "Otro"],
     "Gato": ["Persa", "Siamés", "Maine Coon", "Bengalí", "Ragdoll", "Sphynx", "Mestizo","Otro"],
-    "Ave": ["Canario", "Periquito", "Cotorra", "Guacamayo", "Otro"],
-    "Pez": ["Betta", "Goldfish", "Guppy", "Tetra Neón", "Otro"],
-    "Reptil": ["Iguana", "Gecko", "Tortuga", "Serpiente", "Otro"],
     "Otro": []
   };
 
