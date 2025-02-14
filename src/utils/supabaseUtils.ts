@@ -27,6 +27,22 @@ export async function fetchClients(): Promise<Client[]> {
   return clients || [];
 }
 
+export async function updateClient(clientId: string, updatedData: Partial<Client>): Promise<boolean> {
+  const { error } = await supabase
+    .from('clients')
+    .update(updatedData)
+    .eq('id', clientId);
+
+  if (error) {
+    console.error("❌ Error al actualizar el cliente:", error);
+    return false;
+  }
+
+  console.log("✅ Cliente actualizado correctamente:", updatedData);
+  return true;
+}
+
+
 export async function deleteClient(clientId: string): Promise<boolean> {
   try {
     // 🔍 Buscar referidos directos de este cliente
