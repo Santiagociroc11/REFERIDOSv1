@@ -99,6 +99,7 @@ function App() {
       setLoading(false);
     }
   };
+  
 
   const speciesData = {
     "Perro": ["Labrador", "Poodle", "Bulldog", "Golden Retriever", "Chihuahua", "Pastor Alemán", "Dálmata", "Shih Tzu", "YorkShire", "Pug", "Pitbull", "Mestizo", "Otro"],
