@@ -100,7 +100,6 @@ function App() {
     }
   };
   
-
   const speciesData = {
     "Perro": ["Labrador", "Poodle", "Bulldog", "Golden Retriever", "Chihuahua", "Pastor Alemán", "Dálmata", "Shih Tzu", "YorkShire", "Pug", "Pitbull", "Mestizo", "Otro"],
     "Gato": ["Persa", "Siamés", "Maine Coon", "Bengalí", "Ragdoll", "Sphynx", "Mestizo", "Otro"],
