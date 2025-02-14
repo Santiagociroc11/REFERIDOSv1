@@ -23,7 +23,6 @@ export async function fetchClients(): Promise<Client[]> {
     console.error("❌ Error en fetchClients:", error);
   }
 
-  console.log("📢 Datos obtenidos de Supabase:", clients);
   return clients || [];
 }
 

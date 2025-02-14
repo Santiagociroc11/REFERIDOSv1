@@ -47,14 +47,29 @@ function App() {
   }, []);
 
   const handleEditClient = (client: Client) => {
+    const referrer = client.referrer_id
+      ? clients.find(c => c.id === client.referrer_id)
+      : null;
+
+    setEditClient({
+      ...client,
+      referrerId: client.referrer_id || ""
+    });
+
+    setSearchEditReferrerTerm(
+      referrer
+        ? `${referrer.name} - ${referrer.cedula || "Sin cédula"} - ${referrer.phone || "Sin teléfono"}`
+        : ""
+    );
+
     setIsEditing(true);
-    setEditClient(client);
   };
+
 
   const handleUpdateClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editClient) return;
-  
+
     const success = await updateClient(editClient.id, {
       name: editClient.name,
       phone: editClient.phone,
@@ -62,21 +77,23 @@ function App() {
       cedula: editClient.cedula,
       referrer_id: editClient.referrerId || null,
     });
-  
+
     if (success) {
       setIsEditing(false);
       setEditClient(null);
-      await loadClients(); // Refrescar lista de clientes
+      setSearchReferrerTerm(""); // ✅ Limpiar la búsqueda general
+      setSearchEditReferrerTerm(""); // Limpiar búsqueda
+      await loadClients(); // Recargar la lista de clientes
     }
   };
-  
+
+
 
   const loadClients = async () => {
     try {
       const data = await fetchClients();
       setClients(data);
       setLoading(false);
-      console.log("Clientes obtenidos desde Supabase:", data);
     } catch (error) {
       console.error("Error cargando clientes:", error);
       setLoading(false);
@@ -160,7 +177,7 @@ function App() {
         petSpecies: '',
         petBreed: ''
       });
-
+      setSearchReferrerTerm("");
       setShowAddForm(false);
     } catch (error) {
       console.error('❌ Error al registrar cliente:', error);
@@ -199,7 +216,6 @@ function App() {
   const getDirectReferralsCount = (clientId: string): number => {
     if (!clients || clients.length === 0) return 0;
     const count = clients.filter(client => client.referrer_id === clientId).length;
-    console.log(`Referidos directos de ${clientId}:`, count);
     return count;
   };
 
@@ -210,7 +226,6 @@ function App() {
       (total, directClient) => total + clients.filter(client => client.referrer_id === directClient.id).length,
       0
     );
-    console.log(`Referidos indirectos de ${clientId}:`, count);
     return count;
   };
 
@@ -541,141 +556,141 @@ function App() {
                           </div>
 
                           {isEditing && editClient && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div className="bg-white rounded-lg p-6 w-full max-w-md">
-      <h2 className="text-lg font-semibold mb-4">Editar Cliente</h2>
-      <form onSubmit={handleUpdateClient} className="space-y-4">
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                <h2 className="text-lg font-semibold mb-4">Editar Cliente</h2>
+                                <form onSubmit={handleUpdateClient} className="space-y-4">
 
-        {/* Nombre */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Nombre</label>
-          <input
-            type="text"
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={editClient.name}
-            onChange={(e) => setEditClient((prev) => ({ ...prev!, name: e.target.value }))}
-          />
-        </div>
+                                  {/* Nombre */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                                    <input
+                                      type="text"
+                                      required
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                      value={editClient.name}
+                                      onChange={(e) => setEditClient((prev) => ({ ...prev!, name: e.target.value }))}
+                                    />
+                                  </div>
 
-        {/* Teléfono */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-          <input
-            type="tel"
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={editClient.phone}
-            onChange={(e) => setEditClient((prev) => ({ ...prev!, phone: e.target.value }))}
-          />
-        </div>
+                                  {/* Teléfono */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700">Teléfono</label>
+                                    <input
+                                      type="tel"
+                                      required
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                      value={editClient.phone}
+                                      onChange={(e) => setEditClient((prev) => ({ ...prev!, phone: e.target.value }))}
+                                    />
+                                  </div>
 
-        {/* Email */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            type="email"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={editClient.email}
-            onChange={(e) => setEditClient((prev) => ({ ...prev!, email: e.target.value }))}
-          />
-        </div>
+                                  {/* Email */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                                    <input
+                                      type="email"
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                      value={editClient.email}
+                                      onChange={(e) => setEditClient((prev) => ({ ...prev!, email: e.target.value }))}
+                                    />
+                                  </div>
 
-        {/* Cédula */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Cédula</label>
-          <input
-            type="text"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={editClient.cedula}
-            onChange={(e) => setEditClient((prev) => ({ ...prev!, cedula: e.target.value }))}
-          />
-        </div>
+                                  {/* Cédula */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700">Cédula</label>
+                                    <input
+                                      type="text"
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                      value={editClient.cedula}
+                                      onChange={(e) => setEditClient((prev) => ({ ...prev!, cedula: e.target.value }))}
+                                    />
+                                  </div>
 
-        {/* 📌 Referido por */}
-        <div className="relative">
-          <label className="block text-sm font-medium text-gray-700">Referido por (opcional)</label>
+                                  {/* 📌 Referido por */}
+                                  <div className="relative">
+                                    <label className="block text-sm font-medium text-gray-700">Referido por (opcional)</label>
 
-          {/* Input para buscar y mostrar el referido */}
-          <input
-            type="text"
-            placeholder="Buscar por nombre, cédula o teléfono..."
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
-            value={searchEditReferrerTerm}
-            onChange={(e) => {
-              setSearchReferrerTerm(e.target.value);
-              setSearchEditReferrerTerm(e.target.value);
-              setShowReferrerList(true);
-            }}
-            onFocus={() => setShowReferrerList(true)}
-            onBlur={() => setTimeout(() => setShowReferrerList(false), 200)}
-          />
+                                    {/* Input para buscar y mostrar el referido */}
+                                    <input
+                                      type="text"
+                                      placeholder="Buscar por nombre, cédula o teléfono..."
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
+                                      value={searchEditReferrerTerm}
+                                      onChange={(e) => {
+                                        setSearchReferrerTerm(e.target.value);
+                                        setSearchEditReferrerTerm(e.target.value);
+                                        setShowReferrerList(true);
+                                      }}
+                                      onFocus={() => setShowReferrerList(true)}
+                                      onBlur={() => setTimeout(() => setShowReferrerList(false), 200)}
+                                    />
 
-          {/* Botón para limpiar selección */}
-          {editClient.referrerId && (
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-600"
-              onClick={() => {
-                setEditClient(prev => ({ ...prev!, referrerId: "" }));
-                setSearchEditReferrerTerm(""); // ✅ Borrar input al quitar la selección
-              }}
-            >
-              ❌
-            </button>
-          )}
+                                    {/* Botón para limpiar selección */}
+                                    {editClient.referrerId && (
+                                      <button
+                                        type="button"
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-600"
+                                        onClick={() => {
+                                          setEditClient(prev => ({ ...prev!, referrerId: "" }));
+                                          setSearchEditReferrerTerm(""); // ✅ Borrar input al quitar la selección
+                                        }}
+                                      >
+                                        ❌
+                                      </button>
+                                    )}
 
-          {/* Lista de referidos con selección */}
-          {showReferrerList && searchReferrerTerm && (
-            <ul className="absolute mt-1 max-h-40 overflow-auto border border-gray-300 rounded-md bg-white shadow-md w-full z-10">
-              {filteredReferrers.length > 0 ? (
-                filteredReferrers.map(ref => (
-                  <li
-                    key={ref.id}
-                    className={`px-4 py-2 cursor-pointer flex justify-between items-center ${
-                      editClient.referrerId === ref.id ? "bg-green-200 font-bold" : "hover:bg-blue-100"
-                    }`}
-                    onClick={() => {
-                      setEditClient(prev => ({
-                        ...prev!,
-                        referrerId: ref.id
-                      }));
-                      setSearchEditReferrerTerm(`${ref.name} - ${ref.cedula || "Sin cédula"} - ${ref.phone}`); // ✅ Mostrar la selección
-                      setShowReferrerList(false);
-                    }}
-                  >
-                    <span>{ref.name} - {ref.cedula || "Sin cédula"} - {ref.phone}</span>
-                    {editClient.referrerId === ref.id && <span className="text-green-700 font-bold">✔️</span>}
-                  </li>
-                ))
-              ) : (
-                <li className="px-4 py-2 text-gray-500">No se encontraron resultados</li>
-              )}
-            </ul>
-          )}
-        </div>
+                                    {/* Lista de referidos con selección */}
+                                    {showReferrerList && searchEditReferrerTerm && (
+                                      <ul className="absolute mt-1 max-h-40 overflow-auto border border-gray-300 rounded-md bg-white shadow-md w-full z-10">
+                                        {filteredReferrers.length > 0 ? (
+                                          filteredReferrers.map(ref => (
+                                            <li
+                                              key={ref.id}
+                                              className={`px-4 py-2 cursor-pointer flex justify-between items-center ${editClient?.referrerId === ref.id ? "bg-green-200 font-bold" : "hover:bg-blue-100"}`}
+                                              onClick={() => {
+                                                setEditClient(prev => ({
+                                                  ...prev!,
+                                                  referrerId: ref.id,
+                                                }));
+                                                setSearchEditReferrerTerm(`${ref.name} - ${ref.cedula || "Sin cédula"} - ${ref.phone}`);
+                                                setShowReferrerList(false);
+                                              }}
+                                            >
+                                              <span>{ref.name} - {ref.cedula || "Sin cédula"} - {ref.phone}</span>
+                                              {editClient?.referrerId === ref.id && <span className="text-green-700 font-bold">✔️</span>}
+                                            </li>
+                                          ))
+                                        ) : (
+                                          <li className="px-4 py-2 text-gray-500">No se encontraron resultados</li>
+                                        )}
+                                      </ul>
+                                    )}
+                                  </div>
 
-        {/* Botones de Guardar o Cancelar */}
-        <div className="flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={() => setIsEditing(false)}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            Guardar Cambios
-          </button>
-        </div>
+                                  {/* Botones de Guardar o Cancelar */}
+                                  <div className="flex justify-end space-x-3">
+                                    <button
+                                      type="button"
+                                      onClick={() => setIsEditing(false)}
+                                      className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      type="submit"
+                                      disabled={isSubmitting} // Se asegura que el botón solo se deshabilite si está procesando
+                                      className={`px-4 py-2 rounded-lg ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                    >
+                                      {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+                                    </button>
 
-      </form>
-    </div>
-  </div>
-)}
+                                  </div>
+
+                                </form>
+                              </div>
+                            </div>
+                          )}
 
 
 
